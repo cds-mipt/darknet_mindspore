@@ -1,4 +1,5 @@
 #1. Configuring the Running Information
+device_id: 0
 device_target: 'GPU'
 context_mode: 'GRAPH_MODE' #'PYNATIVE_MODE'
 #2. Processing Data

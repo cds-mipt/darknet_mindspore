@@ -20,7 +20,8 @@ if __name__ == '__main__':
     #1. Configuring the Running Information
     config = get_config("default_config.yaml")
     context.set_context(mode=context.GRAPH_MODE if config.context_mode == "GRAPH_MODE" else context.PYNATIVE_MODE, 
-                        device_target=config.device_target)
+                        device_target=config.device_target,
+                        device_id=config.device_id)
 
     #config.outputs_dir = os.path.join(config.save_ckpt_path, datetime.datetime.now().strftime('%Y-%m-%d_time_%H_%M_%S'))
 
