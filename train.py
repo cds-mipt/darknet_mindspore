@@ -6,7 +6,7 @@ from mindspore.nn.metrics import Accuracy
 from mindspore.train.callback import LossMonitor
 from mindspore.train import Model
 from mindspore.nn import Momentum
-
+from mindspore.train.callback import ModelCheckpoint, CheckpointConfig
 
 from src.config import get_config
 from src.darknet import darknet53
@@ -46,8 +46,11 @@ if __name__ == '__main__':
     opt = Momentum(net.trainable_params(), 0.01, 0.9)
 
     #5. Training the Network
+    config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
+    ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", config=config_ck) 
+
     model = Model(net, loss, opt, metrics={"Accuracy": Accuracy()})
-    model.train(config.num_epoch, dataset, callbacks=[LossMonitor()], dataset_sink_mode=False)
+    model.train(config.num_epoch, dataset, callbacks=[ckpoint_cb, LossMonitor()], dataset_sink_mode=False)
     # import numpy as np
     # import mindspore
     # test = mindspore.Tensor(np.random.random_sample((1, 3, 256, 256)), mindspore.float32)
