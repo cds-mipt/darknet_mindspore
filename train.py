@@ -6,7 +6,7 @@ from mindspore import context
 from mindspore.train.callback import LossMonitor
 from mindspore.train import Model
 from mindspore.nn import Momentum
-from mindspore.train.callback import ModelCheckpoint, CheckpointConfig
+from mindspore.train.callback import ModelCheckpoint, CheckpointConfig, SummaryCollector
 
 from src.config import get_config
 from src.darknet import darknet53
@@ -48,11 +48,12 @@ if __name__ == '__main__':
     opt = Momentum(net.trainable_params(), 0.01, 0.9)
 
     #5. Training the Network
+    model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
+
     config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
     ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", directory=config.save_ckpt_path, config=config_ck) 
-
-    model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
-    callbacks = [ckpoint_cb, LossMonitor(300)]
+    summary_collector = SummaryCollector(summary_dir=config.summary_recorder_path, collect_freq=1)
+    callbacks = [ckpoint_cb, LossMonitor(300), summary_collector]
     if config.eval_during_training:
         statistics = {"epoch_num": [], "top1_acc": [], "top2_acc": []}
         callbacks.append(Evaluation_callback(model=model, config=config, eval_per_epoch=config.eval_per_epoch, statistics=statistics))
