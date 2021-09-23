@@ -11,6 +11,18 @@ num_parallel_workers: 6
 #3. Defining the Network
 
 #4. Defining the Loss Function and Optimizer
+lr_init: 0.0
+lr_end: 0.0001
+lr_max: 0.1
+warmup_epochs: 0
+lr_decay_mode: "step"
+
+momentum: 0.9
+loss_scale: 1024
+
+use_label_smooth: True
+label_smooth_factor: 0.1
+
 
 #5. Training the Network
 save_ckpt_path: "./ckpt/"

@@ -7,12 +7,14 @@ from mindspore.train.callback import LossMonitor
 from mindspore.train import Model
 from mindspore.nn import Momentum
 from mindspore.train.callback import ModelCheckpoint, CheckpointConfig, SummaryCollector
+from mindspore import Tensor
 
 from src.config import get_config
 from src.darknet import darknet53
 from src.dataset import create_dataset
 from src.cross_entropy_smooth import CrossEntropySmooth
 from src.custom_callbacks import Evaluation_callback
+from src.lr_scheduler import get_lr
 from evaluation import test_net 
 
 set_seed(1)
@@ -44,8 +46,14 @@ if __name__ == '__main__':
                               reduction="mean",
                               smooth_factor=0.0, 
                               num_classes=1000)
-
-    opt = Momentum(net.trainable_params(), 0.01, 0.9)
+    lr = Tensor(get_lr(lr_init=config.lr_init, 
+                       lr_end=config.lr_end, 
+                       lr_max=config.lr_max,
+                       warmup_epochs=config.warmup_epochs, 
+                       total_epochs=config.num_epoch, 
+                       steps_per_epoch=train_dataset.get_dataset_size(),
+                       lr_decay_mode=config.lr_decay_mode))
+    opt = Momentum(net.trainable_params(), lr, config.momentum, loss_scale=config.loss_scale)
 
     #5. Training the Network
     model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
