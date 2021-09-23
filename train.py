@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     #5. Training the Network
     config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
-    ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", config=config_ck) 
+    ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", directory=config.save_ckpt_path, config=config_ck) 
 
     model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
     callbacks = [ckpoint_cb, LossMonitor(300)]
