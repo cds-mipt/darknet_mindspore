@@ -8,6 +8,7 @@ from mindspore.train import Model
 from mindspore.nn import Momentum
 from mindspore.train.callback import ModelCheckpoint, CheckpointConfig, SummaryCollector
 from mindspore import Tensor
+from mindspore.train.loss_scale_manager import FixedLossScaleManager
 
 from src.config import get_config
 from src.darknet import darknet53
@@ -44,8 +45,8 @@ if __name__ == '__main__':
     #4. Defining the Loss Function and Optimizer
     loss = CrossEntropySmooth(sparse=True, 
                               reduction="mean",
-                              smooth_factor=0.0, 
-                              num_classes=1000)
+                              smooth_factor=config.label_smooth_factor, 
+                              num_classes=config.class_num)
     lr = Tensor(get_lr(lr_init=config.lr_init, 
                        lr_end=config.lr_end, 
                        lr_max=config.lr_max,
@@ -54,9 +55,17 @@ if __name__ == '__main__':
                        steps_per_epoch=train_dataset.get_dataset_size(),
                        lr_decay_mode=config.lr_decay_mode))
     opt = Momentum(net.trainable_params(), lr, config.momentum, loss_scale=config.loss_scale)
+    loss_scale = FixedLossScaleManager(config.loss_scale, drop_overflow_update=False)
 
     #5. Training the Network
-    model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
+    model = Model(net, 
+                  loss_fn=loss, 
+                  optimizer=opt,
+                  loss_scale_manager=loss_scale, 
+                  metrics={'top_1_accuracy', 'top_5_accuracy'},
+                  amp_level="O2",
+                  keep_batchnorm_fp32=False)
+    print('Warning!, FP16 precision')
 
     config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
     ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", directory=config.save_ckpt_path, config=config_ck) 
