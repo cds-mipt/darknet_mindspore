@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
     ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", directory=config.save_ckpt_path, config=config_ck) 
-    summary_collector = SummaryCollector(summary_dir=config.summary_recorder_path, collect_freq=1)
+    summary_collector = SummaryCollector(summary_dir=config.summary_recorder_path, collect_freq=10)
     callbacks = [ckpoint_cb, LossMonitor(300), summary_collector]
     if config.eval_during_training:
         statistics = {"epoch_num": [], "top1_acc": [], "top2_acc": []}
