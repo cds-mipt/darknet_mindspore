@@ -1,8 +1,8 @@
 import os 
 import datetime
+from pprint import pprint
 from mindspore.common import set_seed
 from mindspore import context
-from mindspore.nn.metrics import Accuracy
 from mindspore.train.callback import LossMonitor
 from mindspore.train import Model
 from mindspore.nn import Momentum
@@ -12,6 +12,8 @@ from src.config import get_config
 from src.darknet import darknet53
 from src.dataset import create_dataset
 from src.cross_entropy_smooth import CrossEntropySmooth
+from src.custom_callbacks import Evaluation_callback
+from evaluation import test_net 
 
 set_seed(1)
 
@@ -26,7 +28,7 @@ if __name__ == '__main__':
     #config.outputs_dir = os.path.join(config.save_ckpt_path, datetime.datetime.now().strftime('%Y-%m-%d_time_%H_%M_%S'))
 
     #2. Processing Data
-    dataset = create_dataset(dataset_path=config.dataset_path, 
+    train_dataset = create_dataset(dataset_path=config.dataset_path, 
                              do_train=True, 
                              repeat_num=config.repeat_num,
                              batch_size=config.batch_size, 
@@ -49,12 +51,14 @@ if __name__ == '__main__':
     config_ck = CheckpointConfig(save_checkpoint_steps=config.save_ckpt_step, keep_checkpoint_max=config.keep_checkpoint)
     ckpoint_cb = ModelCheckpoint(prefix="checkpoint_darknet53", config=config_ck) 
 
-    model = Model(net, loss, opt, metrics={"Accuracy": Accuracy()})
-    model.train(config.num_epoch, dataset, callbacks=[ckpoint_cb, LossMonitor()], dataset_sink_mode=False)
-    # import numpy as np
-    # import mindspore
-    # test = mindspore.Tensor(np.random.random_sample((1, 3, 256, 256)), mindspore.float32)
-    # print(test.shape)
-    # out = net(test)
-    # print(out.shape)
+    model = Model(net, loss, opt, metrics={'top_1_accuracy', 'top_5_accuracy'})
+    callbacks = [ckpoint_cb, LossMonitor(300)]
+    if config.eval_during_training:
+        statistics = {"epoch_num": [], "top1_acc": [], "top2_acc": []}
+        callbacks.append(Evaluation_callback(model=model, config=config, eval_per_epoch=config.eval_per_epoch, statistics=statistics))
+
+    model.train(config.num_epoch, train_dataset, callbacks=callbacks, dataset_sink_mode=False)
+
+    #6. Print statistics
+    pprint(statistics)
 
