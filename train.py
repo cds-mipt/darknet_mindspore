@@ -28,7 +28,8 @@ if __name__ == '__main__':
                         device_target=config.device_target,
                         device_id=config.device_id)
 
-    #config.outputs_dir = os.path.join(config.save_ckpt_path, datetime.datetime.now().strftime('%Y-%m-%d_time_%H_%M_%S'))
+    config.save_ckpt_path = os.path.join(config.save_ckpt_path, datetime.datetime.now().strftime('%Y-%m-%d_time_%H_%M_%S'))
+    config.summary_recorder_path = os.path.join(config.summary_recorder_path, datetime.datetime.now().strftime('%Y-%m-%d_time_%H_%M_%S'))
 
     #2. Processing Data
     train_dataset = create_dataset(dataset_path=config.dataset_path, 
