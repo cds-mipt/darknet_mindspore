@@ -32,10 +32,10 @@ num_epoch: 1
 eval_during_training: True
 eval_path: "/datasets/ImageNet/val/"
 eval_per_epoch: 1
-summary_recorder_path: "./summery_recorder/"
+summary_recorder_path: "./summary_recorder/"
 
 #6. evaluation.py->test_net
-checkpoint_name: 'checkpoint_darknet53-1_1875.ckpt'
+checkpoint_name: './ckpt/checkpoint_darknet53-1_20018.ckpt'
 
 
 

@@ -18,13 +18,11 @@ def test_net(config, network=None, model=None, from_checkpoint=False):
                                   num_parallel_workers=config.num_parallel_workers)
 
     if from_checkpoint:
-        assert network is None
+        print(config.checkpoint_name)
         param_dict = load_checkpoint(config.checkpoint_name)
         load_param_into_net(network, param_dict)
 
     if not model:
-        assert network is None
-
         loss = CrossEntropySmooth(sparse=True, 
                               reduction="mean",
                               smooth_factor=0.0, 

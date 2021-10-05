@@ -3,4 +3,4 @@ __pycache__
 *.ckpt
 *.meta
 ckpt/
-summery_recorder/
+summary_recoder/*
